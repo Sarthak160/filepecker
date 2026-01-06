@@ -20,12 +20,11 @@ func main() {
 	outputFilename := *outputPtr
 	ignoreList := *ignorePtr
 
-	// 2. Process Ignore List into a Map for fast lookup
+	// 2. Process Ignore List
 	ignoredExts := make(map[string]bool)
 	if ignoreList != "" {
 		parts := strings.Split(ignoreList, ",")
 		for _, p := range parts {
-			// Ensure extension starts with a dot and trim whitespace
 			cleanExt := strings.TrimSpace(p)
 			if !strings.HasPrefix(cleanExt, ".") {
 				cleanExt = "." + cleanExt
@@ -40,7 +39,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// 3. Create the output file
 	outFile, err := os.Create(outputFilename)
 	if err != nil {
 		fmt.Printf("Error creating output file: %v\n", err)
@@ -50,71 +48,65 @@ func main() {
 
 	fmt.Printf("Scanning: %s\nOutput: %s\nIgnoring: %v\n", root, outputFilename, ignoredExts)
 
-	// 4. Start Walking
-	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	// Call the logic function
+	if err := walkAndWrite(root, outFile, outputFilename, ignoredExts); err != nil {
+		fmt.Printf("Error: %v\n", err)
+	} else {
+		fmt.Println("Done!")
+	}
+}
+
+// walkAndWrite is the core logic, extracted so we can test it
+func walkAndWrite(root string, w io.Writer, skipFilename string, ignoredExts map[string]bool) error {
+	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
 		if info.IsDir() {
-			// Skip hidden directories like .git, .idea, .vscode
 			if strings.HasPrefix(info.Name(), ".") && info.Name() != "." {
 				return filepath.SkipDir
 			}
 			return nil
 		}
 
-		// Check 1: Skip the output file itself
-		if info.Name() == outputFilename {
+		if info.Name() == skipFilename {
 			return nil
 		}
 
-		// Check 2: Skip ignored extensions
 		ext := filepath.Ext(path)
 		if ignoredExts[ext] {
 			return nil
 		}
 
-		// Check 3: Check if file is binary
 		isBin, err := isBinary(path)
 		if err != nil {
-			// If we can't read it, skip it
 			return nil
 		}
 		if isBin {
-			// Silent skip for binaries to keep console clean
 			return nil
 		}
 
-		// 5. Write Header
 		header := fmt.Sprintf("\n========================================\nPATH: %s\n---\n", path)
-		if _, err := outFile.WriteString(header); err != nil {
+		if _, err := w.Write([]byte(header)); err != nil {
 			return err
 		}
 
-		// 6. Write Content
 		srcFile, err := os.Open(path)
 		if err != nil {
 			return nil
 		}
 		defer srcFile.Close()
 
-		if _, err := io.Copy(outFile, srcFile); err != nil {
+		if _, err := io.Copy(w, srcFile); err != nil {
 			return err
 		}
 
-		outFile.WriteString("\n")
+		w.Write([]byte("\n"))
 		return nil
 	})
-
-	if err != nil {
-		fmt.Printf("Error walking the path: %v\n", err)
-	} else {
-		fmt.Println("Done!")
-	}
 }
 
-// isBinary checks the first 512 bytes to guess if a file is binary or text.
 func isBinary(path string) (bool, error) {
 	f, err := os.Open(path)
 	if err != nil {
