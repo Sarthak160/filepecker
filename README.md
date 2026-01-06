@@ -11,7 +11,7 @@ It is designed to be **smart**: it automatically ignores binary files (images, e
 Run this single command in your terminal to download and install `filepecker` automatically (Linux & Mac):
 
 ```bash
-curl -fsSL [https://raw.githubusercontent.com/Sarthak160/filepecker/main/install.sh](https://raw.githubusercontent.com/Sarthak160/filepecker/main/install.sh) | bash
+curl -fsSL https://raw.githubusercontent.com/Sarthak160/filepecker/main/install.sh | bash
 ```
 
 ## ⚙️ Advanced Usage
