@@ -1,0 +1,54 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on tags like v1.0.0, v2.1.3
+
+permissions:
+  contents: write # Needed to create releases and upload assets
+
+jobs:
+  build:
+    name: Build binaries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Build for all these platforms
+        goos: [linux, darwin, windows]
+        goarch: [amd64, arm64]
+        exclude:
+          # Exclude Windows ARM (rarely used for CLIs)
+          - goos: windows
+            goarch: arm64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build Binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          # Define binary name (e.g., filepecker-linux-amd64)
+          BINARY_NAME=filepecker-${{ matrix.goos }}-${{ matrix.goarch }}
+          
+          # Add .exe extension for Windows
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            BINARY_NAME+=".exe"
+          fi
+
+          # Build the binary
+          go build -o $BINARY_NAME main.go
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: filepecker-*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
