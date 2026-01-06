@@ -1,14 +1,14 @@
-## ⚙️ Advanced Usage
+# FilePecker 啄
 
-You can customize the behavior using flags:
+**FilePecker** is a lightweight, robust CLI tool written in Go. It recursively scans your current directory and consolidates the content of all files into a single text file (`file.txt`).
 
-| Flag | Description | Example |
-| :--- | :--- | :--- |
-| `-o` | Set the output filename (default: file.txt) | `filepecker -o mycode.txt` |
-| `-ignore` | Comma-separated list of extensions to skip | `filepecker -ignore .json,.css` |
+It is designed to be **smart**: it automatically ignores binary files (images, executables), `.git` folders, and system files, making it perfect for preparing codebases for LLM context, documentation, or archiving.
 
-**Example:**
-Scan the directory, but output to `backup.txt` and ignore all markdown and JSON files:
+---
+
+## 🚀 Quick Install
+
+Run this single command in your terminal to download and install `filepecker` automatically (Linux & Mac):
 
 ```bash
-filepecker -o backup.txt -ignore .md,.json
+curl -fsSL [https://raw.githubusercontent.com/Sarthak160/filepecker/main/install.sh](https://raw.githubusercontent.com/Sarthak160/filepecker/main/install.sh) | bash

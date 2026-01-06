@@ -13,7 +13,7 @@ import (
 
 func main() {
 	// 1. Define Command Line Flags
-	outputPtr := flag.String("o", "file.txt", "Output filename")
+	outputPtr := flag.String("o", "filepecker.txt", "Output filename")
 	ignorePtr := flag.String("ignore", "", "Comma-separated extensions to ignore (e.g. .json,.md)")
 	flag.Parse()
 
