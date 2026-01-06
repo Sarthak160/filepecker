@@ -1,4 +1,4 @@
-# FilePecker 啄
+# FilePecker
 
 **FilePecker** is a lightweight, robust CLI tool written in Go. It recursively scans your current directory and consolidates the content of all files into a single text file (`file.txt`).
 
